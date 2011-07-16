@@ -1,0 +1,12 @@
+<% if flash[:success].nil? %>       
+	   <form action="/signup" method="post">
+	
+		<input name="user[name]" type="text" value="Name" id="name" />
+	
+		<input name="user[email]" type="text" value="Email" id="email" />
+	
+		<input type="submit" value="Sign Up" />
+	</form>
+	<script type="text/javascript" src="/js/form.js"></script>
+<% end %>
+

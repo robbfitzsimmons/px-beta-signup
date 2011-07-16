@@ -1,3 +1,3 @@
-# Sinatra Boilerplate
+# Proximate Mailing
 
-An event organizer created with Sinatra, ERB, and SASS by Sarah Canieso and Philip Dudley.
+A mailing list for Proximate.ly

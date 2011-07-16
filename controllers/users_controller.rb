@@ -1,159 +1,77 @@
-## Step 1 Authenticate with Linked in
-get '/signup' do
+require 'csv'
 
-	erb :'users/sign_up'
+# Sign up Authenticates with OmniAuth via OmniAuthController
+get '/?' do
+	@user = User.new(params[:user])
+
+	erb :'users/signup'
 end
 
-
-get '/auth/:name/callback' do
-	auth = request.env['omniauth.auth']
-	
-	# PP::pp(auth, $stderr, 50)
-	# Search for a user with the name
-	if(auth["provider"] == "linked_in")
-		@user = User.first(:linked_in => auth["user_info"]["urls"]["LinkedIn"])
-	elsif(auth["provider"] == "twitter")
-		@user = User.first(:twitter => auth["user_info"]["urls"]["Twitter"])
-	end
-	
-	# If user does not exist create a new one
-	if (@user == nil)
-	
-		@user = User.new
-	
-		@user.attributes = {
-			:name         => auth["user_info"]["name"],
-			:description  => auth["user_info"]["description"],
-			:location     => auth["user_info"]["location"],
-			
-			# For twitter drop the _normal for full size, _bigger works too
-			:image     => auth["user_info"]["image"]
-		}
-
-	else
-		# The user already exists, so lets log them in :)
-
-		# And redirect them to their profile page
-		redirect "/users/#{@user.id}"
-	end
-	
-	# if it is linked_in and linked_in has not been filled out
-	if (auth["provider"] == "linked_in" && @user.linked_in == nil)
-		puts "ITS LINKED IN"
-		@user.linked_in = auth["user_info"]["urls"]["LinkedIn"]
-		
-		if (@user.website == nil)
-			@user.website = auth["user_info"]["urls"]["Personal Website"]
-		end
-	end
-	
-	# if it is twitter and twitter has not been filled out
-	if (auth["provider"] == "twitter" && @user.twitter == nil)
-		puts "ITS TWITTER"
-		@user.twitter = auth["user_info"]["urls"]["Twitter"]
-			if (@user.website == nil)
-				@user.website = auth["user_info"]["urls"]["Website"]
-			end
-	end
-	
-	puts @user.linked_in
-
-	session[:user] = @user
-
-	redirect '/signup/step2'
-
-end
-
-get '/signup/step2' do
-	@user = session[:user]
-
-	erb :'users/step2'
-end
-
-post '/signup/step2' do
+post '/signup' do
 	@user = User.new(params[:user])
 
 	if @user.save
 		status(202)
-		redirect "/users/#{@user.id}"
+		flash[:success] = "Thanks! We'll let you know when the app is released."
 	else
 		status(412)
+		flash[:error] = "There was a problem with your name or email."
 		@user.errors.each do |e|
 		    puts e
 		end
-		redirect '/signup/step2'
+	end
+	redirect '/'
+end
+
+get '/login/?' do
+
+		not_logged_in?
+
+	erb :'users/login'
+end
+
+post '/login' do
+
+
+	password = "bulldozer"
+
+	if params[:password] == "bulldozer"
+		session[:user] = "Logged In"
+		redirect '/all'
 	end
 end
 
-# Show a specific user
-get '/users/:id' do
-	@title = "User"
-	@user = User.get(params[:id])
-	
-	erb :'users/show'	
+get '/logout/?' do
+	session[:user] = nil
+	redirect '/'
 end
-
-
-
-
 
 ##############################################################
 # Show all users
-get '/users' do
+get '/all' do
+
+	logged_in?
 
 	@title = "All Users"
 	@users = User.all
 	
-	erb :'users/index'	
+	erb :'users/all', :layout => false
 end
 
+get '/export' do
+	logged_in?
 
+	users = User.all(:order => [:name.desc])
 
-# Show add new user page
-get '/users/new' do
-	@title = "New User"
-	@user = User.new
-	
-	erb :'users/new'	
-end
-
-# Show edit user page
-get '/users/:id/edit' do
-	@title = "Edit User"
-	@user = User.get(params[:id])
-	
-	erb :'users/edit'	
-end
-
-# Add new user
-post '/users' do
-	@user = User.new(params[:user])
-
-	if @user.save
-	
-	else
-
-	end	
-end
-
-# Edit existing user
-put '/users/:id' do
-	@user = User.find(params[:id])
-
-	if @user.save
-	
-	else
-
-	end	
-end
-
-# Delete existing user
-delete '/users/:id' do
-	@user = User.find(params[:id])
-
-	if @user.destroy
-	
-	else
-
-	end	
+	headers "Content-Disposition" => "attachment;filename=ProximateLaunchMailingList#{Time.now.strftime("%Y-%m-%d--%I-%M%p")}.csv",
+	"Content-Type" => "application/octet-stream"
+	csv_string = CSV.generate do |csv|
+		# header row
+		csv << ["id", "Name", "Email"]
+		# data rows
+		users.each do |user|
+	  	csv << ["#{user.id}", "#{user.name}", "#{user.email}"]
+		end
+	end
+	csv_string
 end

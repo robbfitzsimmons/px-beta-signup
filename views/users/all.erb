@@ -19,28 +19,32 @@
 
 	</head>
 	<body>
-		<div id="container">
-			<div id="nametag">
-				<section id="nametag_top">Hello, my name is</section>
-				
-				<section id="nametag_mid">
-					<h1>Proximate</h1>
-				</section>
-				
-				<section id="nametag_bot"></section>
-				
-				<section id="shadow"></section>
-			</div> <!-- //nametag -->
+		<div id="list">
+			<h1>List of Users</h1>
 			
-			<div id="form">
-				<h2>What's yours?</h2>
-				
-				<p>Get ready to say goodbye to simple nametags. Enter your details and we&rsquo;ll notify you on launch!</p>
-			    <%= erb :flash %>
-			    <%= yield %>
+			<a href="/export">Export list to CSV</a>
+			<a href="/logout">Log Out</a>
+			
+			<table>
+				<thead>
+					<tr>
+						<td>ID</td>
+						<td>Name</td>
+						<td>Email</td>
+					</tr>
+				</thead>
+				<% i = 0 %>
+				<% @users.each do |user| %>
+					<% i = i+1 %>
+					<% i%2 == 0 ? @class = "class = 'even'" : @class = "" %>
+					<tr <%= @class %>>
+					    <td><%= user.id %></td>
+					    <td><%= user.name %></td>
+					    <td><%= user.email %></td>
+					</tr>
+				<% end %>
+			</table>
+		</div>
 
-			</div>
-		</div> <!-- //container -->
-	
 	</body>
 </html>
