@@ -1,6 +1,5 @@
 require 'csv'
 
-# Sign up Authenticates with OmniAuth via OmniAuthController
 get '/?' do
 	@user = User.new(params[:user])
 

@@ -10,7 +10,7 @@ DataMapper.setup(:default, ENV['DATABASE_URL'] || "sqlite://#{Dir.pwd}/db/proxim
 DataMapper.finalize
 
 # Reset the db/tables and recreate
-# DataMapper.auto_migrate!
+#DataMapper.auto_migrate!
 
 # Create the db/tables if they don't exist
 DataMapper::auto_upgrade!

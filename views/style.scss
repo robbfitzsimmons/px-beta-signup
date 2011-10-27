@@ -163,6 +163,19 @@ body {
 	&#success { color: #2e9716; }
 }
 
+a, a:visited {
+	color: #909090;
+	float: right;
+	min-width: 1px;
+	margin: 8px 20px;
+	font-size: 13px;
+
+	&:hover {
+		color: #df4c4b;
+		text-decoration: underline;
+	}
+}
+
 #form {
 	float: right;
 	width: 390px;
